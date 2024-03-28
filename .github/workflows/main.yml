@@ -44,10 +44,10 @@ jobs:
       uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
 
     - name: Build and Push Docker user image to Amazon ECR
-      id: build-spg30-user-image
+      id: build-spg30-order-image
       run: |
         ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY=fase5-gff-usuarios
+        ECR_REPOSITORY=fase5-gff-pedidos
         IMAGE_TAG=latest
 
         docker build -f src/main/docker/Dockerfile.jvm -t $ECR_REPOSITORY:$IMAGE_TAG .
@@ -56,7 +56,7 @@ jobs:
 
         echo "image=$ECR_REGISTRY/$REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
     
-    - run: echo ${{needs.build-spg30-user-image.outputs}}
+    - run: echo ${{needs.build-spg30-order-image.outputs}}
 
     - uses: actions/checkout@v2
 
@@ -68,4 +68,4 @@ jobs:
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: Show image URI
-      run: echo ${{ steps.build-spg30-user-image.outputs.image }}
+      run: echo ${{ steps.build-spg30-order-image.outputs.image }}
