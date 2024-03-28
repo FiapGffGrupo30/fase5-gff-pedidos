@@ -1,4 +1,4 @@
-package br.fiap.gff.orders.exception;
+package br.fiap.gff.orders.exception.base;
 
 public class DomainException extends RuntimeException {
 

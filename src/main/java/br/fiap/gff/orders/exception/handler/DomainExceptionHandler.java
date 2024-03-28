@@ -1,6 +1,7 @@
-package br.fiap.gff.orders.exception;
+package br.fiap.gff.orders.exception.handler;
 
-import br.fiap.gff.orders.dto.RestErroResponse;
+import br.fiap.gff.orders.dto.RestErrorResponse;
+import br.fiap.gff.orders.exception.base.DomainException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -10,7 +11,7 @@ public class DomainExceptionHandler implements ExceptionMapper<DomainException> 
 
     @Override
     public Response toResponse(DomainException e) {
-        RestErroResponse errorResponse = new RestErroResponse();
+        RestErrorResponse errorResponse = new RestErrorResponse();
         errorResponse.setMessage(e.getMessage());
         errorResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
         return Response.status(Response.Status.BAD_REQUEST).entity(errorResponse).build();

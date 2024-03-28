@@ -1,5 +1,7 @@
 package br.fiap.gff.orders.exception;
 
+import br.fiap.gff.orders.exception.base.DomainException;
+
 import java.util.UUID;
 
 public class OrderNotFoundByCorrelationalIdException extends DomainException {
