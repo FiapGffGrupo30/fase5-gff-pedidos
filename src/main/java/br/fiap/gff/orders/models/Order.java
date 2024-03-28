@@ -24,7 +24,7 @@ public class Order {
 
     private Long customerId;
 
-    private UUID correlationalId;
+    private UUID transactionId;
 
     private Double total;
 

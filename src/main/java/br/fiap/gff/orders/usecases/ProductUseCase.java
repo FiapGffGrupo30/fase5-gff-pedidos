@@ -14,6 +14,6 @@ public interface ProductUseCase {
 
     Product update(Long id, Product product);
 
-    void delete(Long id);
+    void deleteById(Long id);
 
 }

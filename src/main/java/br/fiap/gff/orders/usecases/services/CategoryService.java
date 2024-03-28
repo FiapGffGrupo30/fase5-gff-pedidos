@@ -1,4 +1,4 @@
-package br.fiap.gff.orders.services;
+package br.fiap.gff.orders.usecases.services;
 
 import br.fiap.gff.orders.exception.CategoryNotFoundException;
 import br.fiap.gff.orders.models.Category;
@@ -43,7 +43,7 @@ public class CategoryService implements CategoryUseCase {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         repository.deleteById(id);
     }
 }

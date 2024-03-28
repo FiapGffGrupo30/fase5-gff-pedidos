@@ -9,7 +9,7 @@ public interface OrderUseCase {
 
     Order filterById(Long id);
 
-    Order filterByCorrelationalId(UUID correlationalId);
+    Order filterByTransactionId(UUID transactionId);
 
     List<Order> getAll();
 
@@ -17,6 +17,6 @@ public interface OrderUseCase {
 
     Order update(Long id, String status);
 
-    void delete(Long id);
+    void deleteById(Long id);
 
 }

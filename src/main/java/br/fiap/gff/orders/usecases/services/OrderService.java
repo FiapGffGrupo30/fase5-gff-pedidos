@@ -1,6 +1,6 @@
-package br.fiap.gff.orders.services;
+package br.fiap.gff.orders.usecases.services;
 
-import br.fiap.gff.orders.exception.OrderNotFoundByCorrelationalIdException;
+import br.fiap.gff.orders.exception.OrderNotFoundByTransactionIdException;
 import br.fiap.gff.orders.exception.OrderNotFoundByIdException;
 import br.fiap.gff.orders.models.Order;
 import br.fiap.gff.orders.repository.OrderRepository;
@@ -23,9 +23,9 @@ public class OrderService implements OrderUseCase {
     }
 
     @Override
-    public Order filterByCorrelationalId(UUID correlationalId) {
-        Order o = repository.find("correlationalId", correlationalId).firstResult();
-        if (o == null) throw new OrderNotFoundByCorrelationalIdException(correlationalId);
+    public Order filterByTransactionId(UUID transactionId) {
+        Order o = repository.find("transactionId", transactionId).firstResult();
+        if (o == null) throw new OrderNotFoundByTransactionIdException(transactionId);
         return o;
     }
 
@@ -49,7 +49,7 @@ public class OrderService implements OrderUseCase {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         repository.deleteById(id);
     }
 }

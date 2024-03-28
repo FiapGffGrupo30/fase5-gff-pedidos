@@ -1,4 +1,4 @@
-package br.fiap.gff.orders.services;
+package br.fiap.gff.orders.usecases.services;
 
 import br.fiap.gff.orders.exception.ProductNotFoundException;
 import br.fiap.gff.orders.models.Category;
@@ -49,7 +49,7 @@ public class ProductService implements ProductUseCase {
 
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         repository.deleteById(id);
     }
 }
