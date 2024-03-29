@@ -8,6 +8,7 @@ import br.fiap.gff.orders.usecases.CategoryUseCase;
 import br.fiap.gff.orders.usecases.ProductUseCase;
 import br.fiap.gff.orders.util.Coalesce;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -42,8 +43,15 @@ public class ProductService implements ProductUseCase {
         Product productToUpdate = filterById(id);
         String name = Coalesce.of(product.getName(), productToUpdate.getName());
         String description = Coalesce.of(product.getDescription(), productToUpdate.getDescription());
-        Product productUpdated = productToUpdate.toBuilder().name(name).description(description).build();
-        repository.persist(productUpdated);
+        Integer quantity = Coalesce.of(product.getQuantity(), productToUpdate.getQuantity());
+        Double price = Coalesce.of(product.getPrice(), productToUpdate.getPrice());
+        Product productUpdated = productToUpdate.toBuilder()
+                .name(name)
+                .description(description)
+                .quantity(quantity)
+                .price(price)
+                .build();
+        repository.getEntityManager().merge(productUpdated);
         return productUpdated;
     }
 

@@ -1,7 +1,7 @@
-package br.fiap.gff.orders.controllers;
+package br.fiap.gff.orders.application.controllers;
 
-import br.fiap.gff.orders.models.Product;
-import br.fiap.gff.orders.usecases.ProductUseCase;
+import br.fiap.gff.orders.models.Order;
+import br.fiap.gff.orders.usecases.OrderUseCase;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -11,24 +11,24 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
-@Path("/products")
+@Path("/orders")
 @RequiredArgsConstructor
-public class ProductController {
+public class OrderController {
 
-    private final ProductUseCase product;
+    private final OrderUseCase order;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll() {
-        List<Product> products = product.getAll();
-        return products.isEmpty() ? Response.noContent().build() : Response.ok(products).build();
+        List<Order> orders = order.getAll();
+        return orders.isEmpty() ? Response.noContent().build() : Response.ok(orders).build();
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getById(Long id) {
-        return Response.ok(product.filterById(id)).build();
+        return Response.ok(order.filterById(id)).build();
     }
 }
 

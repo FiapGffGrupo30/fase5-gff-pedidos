@@ -1,4 +1,4 @@
-package br.fiap.gff.orders.controllers;
+package br.fiap.gff.orders.application.controllers;
 
 import br.fiap.gff.orders.models.Category;
 import br.fiap.gff.orders.usecases.CategoryUseCase;
