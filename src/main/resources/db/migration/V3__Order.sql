@@ -17,7 +17,4 @@ CREATE TABLE orders.orders
 );
 
 ALTER TABLE orders.order_items
-    ADD CONSTRAINT uc_order_items_product UNIQUE (product_id);
-
-ALTER TABLE orders.order_items
     ADD CONSTRAINT fk_order_items_on_order FOREIGN KEY (order_id) REFERENCES orders.orders (id);
