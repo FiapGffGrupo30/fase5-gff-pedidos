@@ -43,6 +43,7 @@ public class OrderService implements OrderUseCase {
                 .transactionId(request.transactionId())
                 .customerId(request.customerId())
                 .items(orderedProducts)
+                .status("CREATED")
                 .build();
 
         repository.persist(order);
