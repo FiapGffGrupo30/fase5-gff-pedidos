@@ -40,11 +40,15 @@ public class OrderService implements OrderUseCase {
         // Creating the list of ordered products
         List<OrderItem> orderedProducts = getOrderItems(event);
 
+        double totalOrder = orderedProducts.stream().reduce(0d, (a, b) ->
+                a + b.getPrice() * b.getQuantity(), Double::sum);
+
         // Creating order
         Order order = Order.builder()
                 .transactionId(event.transactionId())
                 .customerId(event.customerId())
                 .items(orderedProducts)
+                .total(totalOrder)
                 .status("CREATED")
                 .build();
 
