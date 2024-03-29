@@ -41,23 +41,30 @@ public class OrderService implements OrderUseCase {
         List<OrderItem> orderedProducts = getOrderItems(event);
 
         double totalOrder = orderedProducts.stream().reduce(0d, (a, b) ->
-                a + b.getPrice() * b.getQuantity(), Double::sum);
+                a + (b.getPrice() * b.getQuantity()), Double::sum);
 
         // Creating order
-        Order order = Order.builder()
+        Order order = createOrderFromEvent(event, orderedProducts, totalOrder);
+
+        repository.persist(order);
+        Log.info(String.format("[EVENT - CREATE] Order %s created for Transaction %s", order.getId(), order.getTransactionId()));
+
+        // Notifing customer about the order
+        event = event.toBuilder()
+                .orderId(order.getId())
+                .orderPrice(order.getTotal()).
+                status("PENDING PAYMENT").build();
+        notifyCustomer.send(event);
+    }
+
+    private static Order createOrderFromEvent(TransactionEvent event, List<OrderItem> orderedProducts, double totalOrder) {
+        return Order.builder()
                 .transactionId(event.transactionId())
                 .customerId(event.customerId())
                 .items(orderedProducts)
                 .total(totalOrder)
                 .status("CREATED")
                 .build();
-
-        repository.persist(order);
-        Log.info(String.format("[EVENT - CREATE] Order %s created for Transaction %s", order.getId(), order.getTransactionId()));
-
-        // Notifing customer about the order
-        event = event.toBuilder().status("PENDING PAYMENT").build();
-        notifyCustomer.send(event);
     }
 
     private boolean verityTransactionIdempotency(TransactionEvent request) {
