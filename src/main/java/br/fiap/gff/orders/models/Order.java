@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Entity
-@Table(name = "orders")
+@Table(schema = "orders", name = "orders")
 public class Order {
 
     @Id
@@ -30,7 +30,7 @@ public class Order {
 
     private String status;
 
-    @CollectionTable(name = "order_items", joinColumns = @JoinColumn(name = "order_id"))
+    @CollectionTable(schema = "orders", name = "order_items", joinColumns = @JoinColumn(name = "order_id"))
     @ElementCollection
     @Builder.Default
     private List<OrderItem> items = new ArrayList<>();

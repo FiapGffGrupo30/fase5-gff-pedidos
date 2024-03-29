@@ -1,6 +1,6 @@
 package br.fiap.gff.orders.application.events;
 
-import br.fiap.gff.orders.dto.OrderSentRequest;
+import br.fiap.gff.orders.dto.TransactionEvent;
 import br.fiap.gff.orders.usecases.OrderUseCase;
 import io.quarkus.logging.Log;
 import io.smallrye.reactive.messaging.annotations.Blocking;
@@ -11,15 +11,15 @@ import org.eclipse.microprofile.reactive.messaging.Incoming;
 
 @ApplicationScoped
 @RequiredArgsConstructor
-public class OrderReceiveEvent {
+public class OrderCreateEvent {
 
     private final OrderUseCase order;
 
-    @Incoming("create-orders")
+    @Incoming("create")
     @Blocking
-    public void consume(JsonObject message) {
-        OrderSentRequest request = message.mapTo(OrderSentRequest.class);
-        Log.info(String.format("Transaction %s received", request.transactionId()));
-        order.create(request);
+    public void handle(JsonObject message) {
+        TransactionEvent event = message.mapTo(TransactionEvent.class);
+        Log.info(String.format("[EVENT - CREATE] Transaction %s received", event.transactionId()));
+        order.create(event);
     }
 }

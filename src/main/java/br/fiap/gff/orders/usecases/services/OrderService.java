@@ -1,6 +1,7 @@
 package br.fiap.gff.orders.usecases.services;
 
-import br.fiap.gff.orders.dto.OrderSentRequest;
+import br.fiap.gff.orders.application.events.CustomerNotifyEvent;
+import br.fiap.gff.orders.dto.TransactionEvent;
 import br.fiap.gff.orders.exception.OrderNotFoundByIdException;
 import br.fiap.gff.orders.exception.OrderNotFoundByTransactionIdException;
 import br.fiap.gff.orders.exception.base.DomainException;
@@ -27,30 +28,35 @@ public class OrderService implements OrderUseCase {
     private final OrderRepository repository;
     private final TransactionUseCase transaction;
     private final ProductUseCase product;
+    private final CustomerNotifyEvent notifyCustomer;
 
     @Override
     @Transactional
-    public void create(OrderSentRequest request) {
+    public void create(TransactionEvent event) {
         // verify integrity of the request
-        transaction.verify(request.transactionId(), request.customerId());
-        if (verityTransactionIdempotency(request)) return;
+        transaction.verify(event.transactionId(), event.customerId());
+        if (verityTransactionIdempotency(event)) return;
 
         // Creating the list of ordered products
-        List<OrderItem> orderedProducts = getOrderItems(request);
+        List<OrderItem> orderedProducts = getOrderItems(event);
 
         // Creating order
         Order order = Order.builder()
-                .transactionId(request.transactionId())
-                .customerId(request.customerId())
+                .transactionId(event.transactionId())
+                .customerId(event.customerId())
                 .items(orderedProducts)
                 .status("CREATED")
                 .build();
 
         repository.persist(order);
-        Log.info(String.format("Order %s created for Transaction %s", order.getId(), order.getTransactionId()));
+        Log.info(String.format("[EVENT - CREATE] Order %s created for Transaction %s", order.getId(), order.getTransactionId()));
+
+        // Notifing customer about the order
+        event = event.toBuilder().status("PENDING PAYMENT").build();
+        notifyCustomer.send(event);
     }
 
-    private boolean verityTransactionIdempotency(OrderSentRequest request) {
+    private boolean verityTransactionIdempotency(TransactionEvent request) {
         if (repository.find("transactionId", request.transactionId()).firstResult() != null) {
             Log.info(String.format("Transaction %s already processed", request.transactionId()));
             return true;
@@ -58,11 +64,10 @@ public class OrderService implements OrderUseCase {
         return false;
     }
 
-    private List<OrderItem> getOrderItems(OrderSentRequest request) {
+    private List<OrderItem> getOrderItems(TransactionEvent request) {
         // Verification of the products in stock and making the product List
         List<OrderItem> orderedProducts = new ArrayList<>();
-
-        for (OrderSentRequest.Item item : request.items()) {
+        for (TransactionEvent.Item item : request.items()) {
             Product p = product.filterById(item.productId());
             if (p == null) {
                 throw new DomainException(String.format("Product %s not found", item.productId()));
@@ -76,7 +81,6 @@ public class OrderService implements OrderUseCase {
                     .quantity(item.quantity())
                     .build();
             orderedProducts.add(orderedItem);
-
             // Update product stock
             p = p.toBuilder().quantity(p.getQuantity() - item.quantity()).build();
             product.update(item.productId(), p);
@@ -114,6 +118,16 @@ public class OrderService implements OrderUseCase {
         Order orderUpdated = orderToUpdate.toBuilder().status(status).build();
         repository.persist(orderUpdated);
         return orderUpdated;
+    }
+
+    @Override
+    public void update(UUID transactionId, String status) {
+        Order orderToUpdate = filterByTransactionId(transactionId);
+        Order orderUpdated = orderToUpdate.toBuilder().status(status).build();
+        repository.update("status = ?1 where transactionId = ?2", status, transactionId);
+        Log.info(String.format("[EVENT-UPDATE] Order %s updated for Transaction %s",
+                orderUpdated.getId(), orderUpdated.getTransactionId()));
+
     }
 
     @Override

@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @Entity
+@Table(schema = "orders")
 public class Product {
 
     @Id
