@@ -1,0 +1,110 @@
+{
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:746834987111:task-definition/fase5-gff-pedidos:1",
+    "containerDefinitions": [
+        {
+            "name": "fase5-gff-pedidos",
+            "image": "746834987111.dkr.ecr.us-east-1.amazonaws.com/fase5-gff-pedidos:latest",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "name": "fase5-gff-pedidos",
+                    "containerPort": 8080,
+                    "hostPort": 8080,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "quarkus.redis.hosts",
+                    "value": "redis://default:uk7RHGB4vSxlSHTF062Mgvf8spif5wER@redis-15346.c74.us-east-1-4.ec2.cloud.redislabs.com:15346"
+                },
+                {
+                    "name": "quarkus.datasource.password",
+                    "value": "PGD3dsGqiyxn1FLJJ7yT"
+                },
+                {
+                    "name": "rabbitmq-password",
+                    "value": "FEDy9X_2pHcTKt9cYjDFpn0_-OefSIjG"
+                },
+                {
+                    "name": "rabbitmq-virtual-host",
+                    "value": "aozcktlz"
+                },
+                {
+                    "name": "quarkus.datasource.username",
+                    "value": "postgres"
+                },
+                {
+                    "name": "rabbitmq-username",
+                    "value": "aozcktlz"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "ulimits": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": "/ecs/fase5-gff-pedidos",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
+        }
+    ],
+    "family": "fase5-gff-pedidos",
+    "executionRoleArn": "arn:aws:iam::746834987111:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "revision": 1,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+        }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "2048",
+    "memory": "5120",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "registeredAt": "2024-03-29T17:43:40.720Z",
+    "registeredBy": "arn:aws:iam::746834987111:user/adminT30",
+    "tags": []
+}

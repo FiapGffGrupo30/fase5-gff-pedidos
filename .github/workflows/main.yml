@@ -7,6 +7,7 @@ on:
       - 'src/**'
       - '.github/workflows/**'
       - 'gradle/wrapper/**'
+      - 'task-definition.json'
 
 jobs:
   build:
@@ -69,3 +70,19 @@ jobs:
 
     - name: Show image URI
       run: echo ${{ steps.build-spg30-order-image.outputs.image }}
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: fase5-gff-pedidos
+        image: ${{ steps.build-spg30-order-image.outputs.image }}
+    
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: fase5-gff-pedidos
+        cluster: fase5-gff-cluster
+        wait-for-service-stability: false
