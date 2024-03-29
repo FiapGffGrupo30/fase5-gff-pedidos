@@ -1,6 +1,7 @@
 package br.fiap.gff.orders.usecases.services;
 
 import br.fiap.gff.orders.application.events.CustomerNotifyEvent;
+import br.fiap.gff.orders.application.events.PaymentSendEvent;
 import br.fiap.gff.orders.dto.TransactionEvent;
 import br.fiap.gff.orders.exception.OrderNotFoundByIdException;
 import br.fiap.gff.orders.exception.OrderNotFoundByTransactionIdException;
@@ -29,6 +30,7 @@ public class OrderService implements OrderUseCase {
     private final TransactionUseCase transaction;
     private final ProductUseCase product;
     private final CustomerNotifyEvent notifyCustomer;
+    private final PaymentSendEvent paymentEvent;
 
     @Override
     @Transactional
@@ -54,50 +56,9 @@ public class OrderService implements OrderUseCase {
                 .orderId(order.getId())
                 .orderPrice(order.getTotal()).
                 status("PENDING PAYMENT").build();
-        notifyCustomer.send(event);
-    }
 
-    private static Order createOrderFromEvent(TransactionEvent event, List<OrderItem> orderedProducts, double totalOrder) {
-        return Order.builder()
-                .transactionId(event.transactionId())
-                .customerId(event.customerId())
-                .items(orderedProducts)
-                .total(totalOrder)
-                .status("CREATED")
-                .build();
-    }
-
-    private boolean verityTransactionIdempotency(TransactionEvent request) {
-        if (repository.find("transactionId", request.transactionId()).firstResult() != null) {
-            Log.info(String.format("Transaction %s already processed", request.transactionId()));
-            return true;
-        }
-        return false;
-    }
-
-    private List<OrderItem> getOrderItems(TransactionEvent request) {
-        // Verification of the products in stock and making the product List
-        List<OrderItem> orderedProducts = new ArrayList<>();
-        for (TransactionEvent.Item item : request.items()) {
-            Product p = product.filterById(item.productId());
-            if (p == null) {
-                throw new DomainException(String.format("Product %s not found", item.productId()));
-            }
-            if (p.getQuantity() < item.quantity()) {
-                throw new DomainException(String.format("Product %s not in stock", item.productId()));
-            }
-            OrderItem orderedItem = OrderItem.builder()
-                    .price(p.getPrice())
-                    .product(p)
-                    .quantity(item.quantity())
-                    .build();
-            orderedProducts.add(orderedItem);
-            // Update product stock
-            p = p.toBuilder().quantity(p.getQuantity() - item.quantity()).build();
-            product.update(item.productId(), p);
-        }
-
-        return orderedProducts;
+        // Notifing customer and payment services
+        broadcastingEvents(event);
     }
 
     @Override
@@ -144,5 +105,54 @@ public class OrderService implements OrderUseCase {
     @Override
     public void deleteById(Long id) {
         repository.deleteById(id);
+    }
+
+
+    private void broadcastingEvents(TransactionEvent event) {
+        paymentEvent.send(event);
+        notifyCustomer.send(event);
+    }
+
+    private static Order createOrderFromEvent(TransactionEvent event, List<OrderItem> orderedProducts, double totalOrder) {
+        return Order.builder()
+                .transactionId(event.transactionId())
+                .customerId(event.customerId())
+                .items(orderedProducts)
+                .total(totalOrder)
+                .status("CREATED")
+                .build();
+    }
+
+    private boolean verityTransactionIdempotency(TransactionEvent request) {
+        if (repository.find("transactionId", request.transactionId()).firstResult() != null) {
+            Log.info(String.format("Transaction %s already processed", request.transactionId()));
+            return true;
+        }
+        return false;
+    }
+
+    private List<OrderItem> getOrderItems(TransactionEvent request) {
+        // Verification of the products in stock and making the product List
+        List<OrderItem> orderedProducts = new ArrayList<>();
+        for (TransactionEvent.Item item : request.items()) {
+            Product p = product.filterById(item.productId());
+            if (p == null) {
+                throw new DomainException(String.format("Product %s not found", item.productId()));
+            }
+            if (p.getQuantity() < item.quantity()) {
+                throw new DomainException(String.format("Product %s not in stock", item.productId()));
+            }
+            OrderItem orderedItem = OrderItem.builder()
+                    .price(p.getPrice())
+                    .product(p)
+                    .quantity(item.quantity())
+                    .build();
+            orderedProducts.add(orderedItem);
+            // Update product stock
+            p = p.toBuilder().quantity(p.getQuantity() - item.quantity()).build();
+            product.update(item.productId(), p);
+        }
+
+        return orderedProducts;
     }
 }
